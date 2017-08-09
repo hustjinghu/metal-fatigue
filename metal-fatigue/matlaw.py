@@ -33,7 +33,7 @@ def masing(s, matlaw, **kwargs):
         eps: strain/stress acording to Masings law [1] and a given material law
 
     Notes:
-                A material behavior according to masing is given, when by a given re-loading the doubled stress and strain changes are applied to the inital material law.
+        A material behavior according to masing is given, when by a given re-loading the doubled stress and strain changes are applied to the inital material law.
 
         [1] G. Masing: Eigenspannungen und Verfestigung beim Messing. In: Proc. 2nd Int. Cong. of Appl. Mech. Zürich 1926, S. 332–335
     """
