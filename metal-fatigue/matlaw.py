@@ -16,7 +16,7 @@ def rambosg(s, E, K, n):
     Notes:
         [1] W. Ramberg, W. R. Osgood: Description of stress-strain curves by three parameters. In: NACA Technical note. Band 902, No. 902, 1943, S. 1–28
     """
-    eps = s / E + (s / K)**n
+    eps = s / E + (s / K)**(1 / n)
     return eps
 
 
@@ -33,7 +33,7 @@ def masing(s, matlaw, **kwargs):
         eps: strain/stress acording to Masings law [1] and a given material law
 
     Notes:
-		A material behavior according to masing is given, when by a given re-loading the doubled stress and strain changes are applied to the inital material law.
+                A material behavior according to masing is given, when by a given re-loading the doubled stress and strain changes are applied to the inital material law.
 
         [1] G. Masing: Eigenspannungen und Verfestigung beim Messing. In: Proc. 2nd Int. Cong. of Appl. Mech. Zürich 1926, S. 332–335
     """
