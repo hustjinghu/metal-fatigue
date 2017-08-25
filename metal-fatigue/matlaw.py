@@ -39,3 +39,21 @@ def masing(s, matlaw, **kwargs):
     """
     eps = 1. / 2 * matlaw(2 * s, **kwargs)
     return eps
+
+
+def paris(K, C, m):
+    """Calculates the crack growth rate from a given stress intensity factor range accodring to Paris. 
+
+    Args:
+        K (array_like): stress intensity factor
+        C (array_like): crack growth coefficient
+        m (array_like): crack growth exponent
+
+    Returns:
+        array_like: crack growth rate according to Paris [1]
+
+    Notes:
+        [1] P.C. Paris, M.P. Gomez, W.E. Anderson: A Rational Analytic Theory of Fatigue. The Trend in Engineering Vo.13 No.1 (1961), S. 9–14
+    """
+    dadN = C * K**m
+    return dadN
