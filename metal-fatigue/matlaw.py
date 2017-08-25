@@ -27,10 +27,10 @@ def masing(s, matlaw, **kwargs):
     Args:
         s (array_like): stress/strain
         matlaw (function): initial material law (must be formulated explicitly as a function of s or eps)
-        **kwargs: optional Parameters handed to the material law
+        **kwargs (optional): optional Parameters handed to the material law
 
     Returns:
-        eps: strain/stress acording to Masings law [1] and a given material law
+        array_like: strain/stress according to Masings law [1] and a given material law
 
     Notes:
         A material behavior according to masing is given, when by a given re-loading the doubled stress and strain changes are applied to the inital material law.
