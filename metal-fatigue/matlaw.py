@@ -11,7 +11,7 @@ def rambosg(s, E, K, n):
         n (array_like): cyclic strain hardening exponent
 
     Returns:
-        eps (array_like): strain according to Ramberg & Osgood's material law, see [1]
+        array_like: strain according to Ramberg & Osgood's material law, see [1]
 
     Notes:
         [1] W. Ramberg, W. R. Osgood: Description of stress-strain curves by three parameters. In: NACA Technical note. Band 902, No. 902, 1943, S. 1–28
