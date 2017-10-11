@@ -18,7 +18,7 @@ def add(*matrices):
         *matrices: Rainflow matrices to add. Must be the same size.
     """
     # check, if matrices are of the same size and shape
-    consistency_check(matrices)
+    consistency_check(*matrices)
 
     # generate an rainflow matrix with zeros
     xbinsize = matrices[0].xbinsize
@@ -28,7 +28,7 @@ def add(*matrices):
 
     # summing up the matrix entries
     for mat in matrices:
-        output.counts += mat
+        output.counts = output.counts + mat.counts
     return output
 
 
