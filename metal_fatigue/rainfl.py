@@ -3,7 +3,7 @@ import numpy as np
 # definition of a class which represents a rainflow matrix
 
 
-class rfm:
+class rfm(object):
     def __init__(self, xbinsize, ybinsize, counts):
         self.xbinsize = xbinsize
         self.ybinsize = ybinsize
