@@ -40,8 +40,8 @@ def consistency_check(*matrices):
     """
     xbinsize = matrices[0].xbinsize
     ybinsize = matrices[0].ybinsize
-    shape = matrices[0].counts.shape()
+    shape = matrices[0].counts.shape
     for mat in matrices:
-        if not mat.xbinsize == xbinsize or not mat.ybinsize == ybinsize or not mat.counts.shape() == shape:
+        if not mat.xbinsize == xbinsize or not mat.ybinsize == ybinsize or not mat.counts.shape == shape:
             raise ValueError("Rainflow matrices must be of same shape and same size")
     pass
