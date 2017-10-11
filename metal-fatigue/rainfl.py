@@ -28,3 +28,18 @@ def add(*matrices):
     for mat in matrices:
         output.counts += mat
     return output
+
+
+def consistency_check(*matrices):
+    """Compares binsize and shape of the given list of matrices.
+
+    Args:
+        *matrices: a list or tuple of Rainflow matrices to add.
+    """
+    xbinsize = matrices[0].xbinsize
+    ybinsize = matrices[0].ybinsize
+    shape = matrices[0].counts.shape()
+    for mat in matrices:
+        if not mat.xbinsize == xbinsize or not mat.ybinsize == ybinsize or not mat.counts.shape() == shape:
+            raise ValueError("Rainflow matrices must be of same shape and same size")
+    pass
