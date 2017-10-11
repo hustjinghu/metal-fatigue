@@ -15,7 +15,7 @@ def add(*matrices):
     """Adds two or more rainflow matrices
 
     Args:
-        *matrices: a list or tuple of Rainflow matrices to add. Must be the same size.
+        *matrices: Rainflow matrices to add. Must be the same size.
     """
     # check, if matrices are of the same size and shape
     consistency_check(matrices)
@@ -36,7 +36,7 @@ def consistency_check(*matrices):
     """Compares binsize and shape of the given list of matrices.
 
     Args:
-        *matrices: a list or tuple of Rainflow matrices to add.
+        *matrices: Rainflow matrices to compare.
     """
     xbinsize = matrices[0].xbinsize
     ybinsize = matrices[0].ybinsize
