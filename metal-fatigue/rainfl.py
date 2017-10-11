@@ -17,6 +17,8 @@ def add(*matrices):
     Args:
         *matrices: a list or tuple of Rainflow matrices to add. Must be the same size.
     """
+    #check, if matrices are of the same size and shape 
+    consistency_check(*matrices)
 
     # generate an rainflow matrix with zeros
     xbinsize = matrices[0].xbinsize
