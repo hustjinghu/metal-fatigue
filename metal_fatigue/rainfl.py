@@ -84,7 +84,7 @@ def mulitply(*matrices):
     counts = np.ones_like(matrices[0].counts)
     output = rfm(counts, binsize)
 
-    # summing up the matrix entries
+    # multiplication of the matrix entries
     for mat in matrices:
         output.counts = output.counts * mat.counts
     return output
