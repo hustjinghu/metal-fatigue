@@ -11,6 +11,16 @@ class rfm(object):
         # counts should be a numpy array
         self.counts = counts
 
+def zeroes_like(matrix):
+    """Generates a rainflow matrix filled with zeroes only on the same scale as matrix
+    
+    Args:
+        matrix: a rainflow matrix
+    
+    Returns:
+        rfm: return rainflow matrix object
+    """
+    return rfm(np.zeros_like(matrix.counts),matrix.binsize,matrix.xmin,matrix.ymin)
 
 def add(*matrices):
     """Adds two or more rainflow matrices
