@@ -76,7 +76,7 @@ def mulitply(*matrices):
 
     Args:
         *matrices: Rainflow matrices to multiply. Must be the same size.
-    
+
     Returns:
         rfm: return rainflow matrix object
     """
@@ -90,3 +90,16 @@ def mulitply(*matrices):
     for mat in matrices:
         output.counts = output.counts * mat.counts
     return output
+
+
+def extrapolate(matrix, factor):
+    """Simple extrapolation of a rainflow matrix by a given factor
+
+    Args:
+        matrix (rfm): Rainflow matrix object
+        factor (float): floating point/integer factor
+
+    Returns:
+        rfm: rainflow matrix object
+    """
+    return rfm(matrix.counts * factor, matrix.binsize, matrix.xmin, matrix.ymin)
