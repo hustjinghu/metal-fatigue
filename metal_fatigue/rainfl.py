@@ -45,3 +45,24 @@ def consistency_check(*matrices):
         if not mat.xbinsize == xbinsize or not mat.ybinsize == ybinsize or not mat.counts.shape == shape:
             raise ValueError("Rainflow matrices must be of same shape and same size")
     pass
+
+
+def mulitply(*matrices):
+    """Multiplies two or more rainflow matrices
+
+    Args:
+        *matrices: Rainflow matrices to multiply. Must be the same size.
+    """
+    # check, if matrices are of the same size and shape
+    consistency_check(*matrices)
+
+    # generate an rainflow matrix with ones
+    xbinsize = matrices[0].xbinsize
+    ybinsize = matrices[0].ybinsize
+    counts = np.ones_like(matrices[0].counts)
+    output = rfm(xbinsize, ybinsize, counts)
+
+    # summing up the matrix entries
+    for mat in matrices:
+        output.counts = output.counts * mat.counts
+    return output
