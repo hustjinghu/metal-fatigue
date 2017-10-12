@@ -12,7 +12,7 @@ class rfm(object):
         self.counts = counts
 
 
-def zeroes_like(matrix):
+def zerosrfm_like(matrix):
     """Generates a rainflow matrix filled with zeroes only on the same scale as matrix
 
     Args:
@@ -24,7 +24,7 @@ def zeroes_like(matrix):
     return rfm(np.zeros_like(matrix.counts), matrix.binsize, matrix.xmin, matrix.ymin)
 
 
-def ones_like(matrix):
+def onesrfm_like(matrix):
     """Generates a rainflow matrix filled with ones only on the same scale as matrix
 
     Args:
@@ -46,9 +46,7 @@ def add(*matrices):
     consistency_check(*matrices)
 
     # generate an rainflow matrix with zeros
-    binsize = matrices[0].binsize
-    counts = np.zeros_like(matrices[0].counts)
-    output = rfm(counts, binsize)
+    output = zerosrfm_like(matrices[0])
 
     # summing up the matrix entries
     for mat in matrices:
@@ -80,9 +78,7 @@ def mulitply(*matrices):
     consistency_check(*matrices)
 
     # generate an rainflow matrix with ones
-    binsize = matrices[0].binsize
-    counts = np.ones_like(matrices[0].counts)
-    output = rfm(counts, binsize)
+    output = onesrfm_like(matrices[0])
 
     # multiplication of the matrix entries
     for mat in matrices:
