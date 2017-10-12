@@ -4,9 +4,8 @@ import numpy as np
 
 
 class rfm(object):
-    def __init__(self, xbinsize, ybinsize, counts):
-        self.xbinsize = xbinsize
-        self.ybinsize = ybinsize
+    def __init__(self, binsize, counts):
+        self.binsize = binsize
         # counts should be a numpy array
         self.counts = counts
 
@@ -21,10 +20,9 @@ def add(*matrices):
     consistency_check(*matrices)
 
     # generate an rainflow matrix with zeros
-    xbinsize = matrices[0].xbinsize
-    ybinsize = matrices[0].ybinsize
+    binsize = matrices[0].binsize
     counts = np.zeros_like(matrices[0].counts)
-    output = rfm(xbinsize, ybinsize, counts)
+    output = rfm(binsize, counts)
 
     # summing up the matrix entries
     for mat in matrices:
@@ -38,11 +36,10 @@ def consistency_check(*matrices):
     Args:
         *matrices: Rainflow matrices to compare.
     """
-    xbinsize = matrices[0].xbinsize
-    ybinsize = matrices[0].ybinsize
+    binsize = matrices[0].binsize
     shape = matrices[0].counts.shape
     for mat in matrices:
-        if not mat.xbinsize == xbinsize or not mat.ybinsize == ybinsize or not mat.counts.shape == shape:
+        if not mat.binsize == binsize or not mat.counts.shape == shape:
             raise ValueError("Rainflow matrices must be of same shape and same size")
     pass
 
@@ -57,10 +54,9 @@ def mulitply(*matrices):
     consistency_check(*matrices)
 
     # generate an rainflow matrix with ones
-    xbinsize = matrices[0].xbinsize
-    ybinsize = matrices[0].ybinsize
+    binsize = matrices[0].binsize
     counts = np.ones_like(matrices[0].counts)
-    output = rfm(xbinsize, ybinsize, counts)
+    output = rfm(binsize, counts)
 
     # summing up the matrix entries
     for mat in matrices:
