@@ -4,8 +4,10 @@ import numpy as np
 
 
 class rfm(object):
-    def __init__(self, binsize, counts):
+    def __init__(self, counts, binsize, xmin, ymin):
         self.binsize = binsize
+        self.xmin = xmin
+        self.ymin = ymin
         # counts should be a numpy array
         self.counts = counts
 
@@ -22,7 +24,7 @@ def add(*matrices):
     # generate an rainflow matrix with zeros
     binsize = matrices[0].binsize
     counts = np.zeros_like(matrices[0].counts)
-    output = rfm(binsize, counts)
+    output = rfm(counts, binsize)
 
     # summing up the matrix entries
     for mat in matrices:
@@ -56,7 +58,7 @@ def mulitply(*matrices):
     # generate an rainflow matrix with ones
     binsize = matrices[0].binsize
     counts = np.ones_like(matrices[0].counts)
-    output = rfm(binsize, counts)
+    output = rfm(counts, binsize)
 
     # summing up the matrix entries
     for mat in matrices:
