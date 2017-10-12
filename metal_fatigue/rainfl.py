@@ -41,6 +41,9 @@ def add(*matrices):
 
     Args:
         *matrices: Rainflow matrices to add. Must be the same size.
+
+    Returns:
+        rfm: return rainflow matrix object
     """
     # check, if matrices are of the same size and shape
     consistency_check(*matrices)
@@ -73,6 +76,9 @@ def mulitply(*matrices):
 
     Args:
         *matrices: Rainflow matrices to multiply. Must be the same size.
+    
+    Returns:
+        rfm: return rainflow matrix object
     """
     # check, if matrices are of the same size and shape
     consistency_check(*matrices)
