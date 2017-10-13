@@ -103,3 +103,73 @@ def extrapolate(matrix, factor):
         rfm: rainflow matrix object
     """
     return rfm(matrix.counts * factor, matrix.binsize, matrix.xmin, matrix.ymin)
+
+def rainflow_count(series, min, max, binsize):
+    """Performs rainflow cycle counting and digitizing on a turning point series. Counting occurs according to ASTM E1049 − 85 (2017).
+    (Adds a bin if (max-min)/binsize is not an integer)
+
+    
+    Args:
+        series (numpy array): turning points
+        min (float): minimum value of bin
+        max (float): maximum value of bin
+        binsize (float): size of bins
+    
+    Returns:
+        rfm: rainflow matrix
+    """
+    #series to turnuíng points
+    bins = np.range(min,max,binsize) # round up
+    turning_points = np.digitize(seris,np.ceil(bins))
+    size = np.size(bins)
+
+    #init empty matrix
+    zeroes = np.zeroes((size,size))
+    output = rfm(zeroes,binsize,min,min)
+
+    #
+    cache = []
+    S = turning_points[0]
+
+    def count_helper(cycles):
+        if Y > 0:
+            i = cache[-3]
+            j = cache[-2]
+        else:
+            i = cache[-2]
+            j = cache[-3]
+        output.counts[i,j] = output.counts[i,j] + cycles
+
+    for i,point in enumerate(turning_points):
+        # step 1
+        cache.append(point)
+
+        #step 6
+        if i == np.size(turning_points):
+            while len(cache) > 1:
+                Y = cache[-2] - cache[-1]
+                count_helper(0.5)
+                cache.pop()
+
+        while len(cache) >= 3:
+            #step 2
+            X = cache[-2]-cache[-1]
+            Y = cache[-3]-cache[-2]
+
+            #step 3
+            if np.abs(X) < np.abs(Y):
+                break
+            #step 4
+            elif len(cache) > 3:
+                count_helper(1)
+                last = cache.pop()
+                cache.pop()
+                cache.pop()
+                cache.append(last)
+                continue
+            #step 5
+            count_helper(0.5)
+            cache.reverse()
+            cache.pop()
+            cache.reverse()
+    return output
