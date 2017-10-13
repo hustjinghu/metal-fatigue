@@ -149,6 +149,7 @@ def rainflow_count(series, min, max, binsize):
                 Y = cache[-2] - cache[-1]
                 count_helper(0.5)
                 cache.pop()
+            continue
 
         while len(cache) >= 3:
             # step 2
