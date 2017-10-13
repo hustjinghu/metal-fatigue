@@ -107,7 +107,7 @@ def extrapolate(matrix, factor):
     return rfm(matrix.counts * factor, matrix.binsize, matrix.xmin, matrix.ymin)
 
 
-def rainflow_count(series, min, max, binsize):
+def rainflow_count(series, min, max, numbins):
     """Performs rainflow cycle counting and digitizing on a turning point series. Counting occurs according to ASTM E1049 − 85 (2017).
     (Adds a bin if (max-min)/binsize is not an integer)
 
@@ -122,13 +122,13 @@ def rainflow_count(series, min, max, binsize):
         rfm: rainflow matrix
     """
     # series to turnuíng points
-    bins = np.range(min, max, binsize)  # round up
-    turning_points = np.digitize(seris, np.ceil(bins))
+    bins = np.linspace(min, max, numbins)  # round up
+    turning_points = np.digitize(series, np.ceil(bins))
     size = np.size(bins)
-
+    binsize = bins[1] - bins[0]
     # init empty matrix
-    zeroes = np.zeroes((size, size))
-    output = rfm(zeroes, binsize, min, min)
+    zeros = np.zeros((size, size))
+    output = rfm(zeros, binsize, min, min)
 
     cache = []
 
