@@ -129,7 +129,6 @@ def rainflow_count(series, min, max, binsize):
     output = rfm(zeroes, binsize, min, min)
 
     cache = []
-    S = turning_points[0]
 
     def count_helper(cycles):
         if Y > 0:
