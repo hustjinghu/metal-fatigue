@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class _rfm(object):
@@ -21,6 +22,37 @@ class _rfm(object):
         """
         return _rfm(self.counts * factor, self.binsize, self.xmin, self.ymin, self.mattype)
 
+    def plot(self, **kwargs):
+        """2D Colormap plot of the Rainflow matrix
+        
+        Args:
+            **kwargs: Description
+        
+        Returns:
+            TYPE: Description
+        """
+        #create fig, ax
+        fig = plt.figure()
+        ax = fig.add_subplot((111))
+        #imshow plot
+        cax = ax.imshow(rfm.counts,cmap=plt.get_cmap("Blues"),extent=(rxmin,rxmax,rymin,rymax))
+
+        #create grid
+        rxmax = rfm.xmin + rfm.binsize * rfm.counts.shape[0]
+        rxmin = rfm.xmin
+        rymax = rfm.ymin + rfm.binsize * rfm.counts.shape[1]
+        rymin = rfm.ymin
+        xticks = np.linspace(rxmin,rxmax,int(np.ceil((rxmax-rxmin)/rfm.binsize+1)))
+        yticks = np.linspace(rymin,rymax,int(np.ceil((rymax-rymin)/rfm.binsize+1)))
+        ax.set_xticks(xticks,minor=True) 
+        ax.set_yticks(yticks,minor=True) 
+        ax.grid(which='both')
+        ax.grid(which='minor',alpha = 0.8)
+
+        #create colorbar
+        fig.colorbar(cax,ticks=np.linspace(0,rfm.counts.max(),10))
+        return fig,ax
+
 
 class from_to(_rfm):
     """Rainflow object of type "FromTo"
@@ -34,7 +66,7 @@ class from_to(_rfm):
     Notes: 
         Binning convention is: bin[i-1] < x <= bin[i]
     """
-    
+
     def __init__(self, counts, binsize, xmin, ymin):
         _rfm.__init__(self, counts, binsize, xmin, ymin, mattype='FromTo')
 
@@ -51,6 +83,7 @@ class range_mean(_rfm):
     Notes: 
         Binning convention is: bin[i-1] < x <= bin[i]
     """
+
     def __init__(self, counts, binsize, xmin, ymin):
         _rfm.__init__(self, counts, binsize, xmin, ymin, mattype='RangeMean')
 
@@ -160,7 +193,6 @@ def rainflow_count(series, min, max, numbins):
     # series to turnuíng points
     bins = np.linspace(min, max, numbins + 1)
     turning_points = np.digitize(series, bins) - 1
-    print(turning_points)
     binsize = bins[1] - bins[0]
     # init empty matrix
     zeros = np.zeros((numbins, numbins))
