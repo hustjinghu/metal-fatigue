@@ -22,7 +22,7 @@ class _rfm(object):
         """
         return _rfm(self.counts * factor, self.binsize, self.xmin, self.ymin, self.mattype)
 
-    def plot(self, **kwargs):
+    def plot2d(self, **kwargs):
         """2D Colormap plot of the Rainflow matrix
         
         Args:
