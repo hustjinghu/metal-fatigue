@@ -122,44 +122,36 @@ def rainflow_count(series, min, max, numbins):
         rfm: rainflow matrix
     """
     # series to turnuíng points
-    bins = np.linspace(min, max, numbins)  # round up
-    turning_points = np.digitize(series, np.ceil(bins))
-    size = np.size(bins)
+    bins = np.linspace(min, max, numbins + 1)
+    turning_points = np.digitize(series, bins) - 1
     binsize = bins[1] - bins[0]
     # init empty matrix
-    zeros = np.zeros((size, size))
+    zeros = np.zeros((numbins, numbins))
     output = rfm(zeros, binsize, min, min)
 
     cache = []
 
     def count_helper(cycles):
-        if Y > 0:
-            i = cache[-3]
-            j = cache[-2]
-        else:
-            i = cache[-2]
-            j = cache[-3]
+        i = Y[0]
+        j = Y[1]
         output.counts[i, j] = output.counts[i, j] + cycles
-
     for i, point in enumerate(turning_points):
         # step 1
         cache.append(point)
-
         # step 6
-        if i == np.size(turning_points):
+        if i == (np.size(turning_points) - 1):
             while len(cache) > 1:
-                Y = cache[-2] - cache[-1]
+                Y = [cache[-2], cache[-1]]
                 count_helper(0.5)
                 cache.pop()
-            continue
+            break
 
         while len(cache) >= 3:
             # step 2
-            X = cache[-2] - cache[-1]
-            Y = cache[-3] - cache[-2]
-
+            X = [cache[-2], cache[-1]]
+            Y = [cache[-3], cache[-2]]
             # step 3
-            if np.abs(X) < np.abs(Y):
+            if np.abs(X[0] - X[1]) < np.abs(Y[0] - Y[1]):
                 break
             # step 4
             elif len(cache) > 3:
