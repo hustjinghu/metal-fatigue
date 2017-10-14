@@ -1,15 +1,25 @@
 import numpy as np
 
-# definition of a class which represents a rainflow matrix
-
 
 class rfm(object):
+    # definition of a class which represents a rainflow matrix
     def __init__(self, counts, binsize, xmin, ymin):
         self.binsize = binsize
         self.xmin = xmin
         self.ymin = ymin
         # counts should be a numpy array
         self.counts = counts
+
+    def extrapolate(self, factor):
+        """Simple extrapolation of a rainflow matrix by a given factor
+
+        Args:
+            factor (float): floating point/integer factor
+
+        Returns:
+            rfm: rainflow matrix object
+        """
+        return rfm(self.counts * factor, self.binsize, self.xmin, self.ymin)
 
 
 def zerosrfm_like(matrix):
@@ -65,8 +75,10 @@ def consistency_check(*matrices):
     """
     binsize = matrices[0].binsize
     shape = matrices[0].counts.shape
+    xmin = matrices[0].xmin
+    ymin = matrices[0].ymin
     for mat in matrices:
-        if not mat.binsize == binsize or not mat.counts.shape == shape:
+        if not (mat.binsize == binsize and mat.counts.shape == shape and mat.xmin == xmin and mat.ymin == ymin):
             raise ValueError("Rainflow matrices must be of same shape and same size")
     pass
 
@@ -92,14 +104,63 @@ def mulitply(*matrices):
     return output
 
 
-def extrapolate(matrix, factor):
-    """Simple extrapolation of a rainflow matrix by a given factor
+def rainflow_count(series, min, max, numbins):
+    """Performs rainflow cycle counting and digitizing on a turning point series. Counting occurs according to ASTM E1049 − 85 (2017).
+    (Adds a bin if (max-min)/binsize is not an integer)
+
 
     Args:
-        matrix (rfm): Rainflow matrix object
-        factor (float): floating point/integer factor
+        series (numpy array): turning points
+        min (float): minimum value of bin
+        max (float): maximum value of bin
+        binsize (float): number of bins in one direction
 
     Returns:
-        rfm: rainflow matrix object
+        rfm: rainflow matrix (quadratic form)
     """
-    return rfm(matrix.counts * factor, matrix.binsize, matrix.xmin, matrix.ymin)
+    # series to turnuíng points
+    bins = np.linspace(min, max, numbins + 1)
+    turning_points = np.digitize(series, bins) - 1
+    binsize = bins[1] - bins[0]
+    # init empty matrix
+    zeros = np.zeros((numbins, numbins))
+    output = rfm(zeros, binsize, min, min)
+
+    cache = []
+
+    def count_helper(cycles):
+        i = Y[0]
+        j = Y[1]
+        output.counts[i, j] = output.counts[i, j] + cycles
+    for i, point in enumerate(turning_points):
+        # step 1
+        cache.append(point)
+        # step 6
+        if i == (np.size(turning_points) - 1):
+            while len(cache) > 1:
+                Y = [cache[-2], cache[-1]]
+                count_helper(0.5)
+                cache.pop()
+            break
+
+        while len(cache) >= 3:
+            # step 2
+            X = [cache[-2], cache[-1]]
+            Y = [cache[-3], cache[-2]]
+            # step 3
+            if np.abs(X[0] - X[1]) < np.abs(Y[0] - Y[1]):
+                break
+            # step 4
+            elif len(cache) > 3:
+                count_helper(1)
+                last = cache.pop()
+                cache.pop()
+                cache.pop()
+                cache.append(last)
+                continue
+            # step 5
+            count_helper(0.5)
+            cache.reverse()
+            cache.pop()
+            cache.reverse()
+    return output
