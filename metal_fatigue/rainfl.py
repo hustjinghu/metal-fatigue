@@ -77,8 +77,13 @@ def consistency_check(*matrices):
     shape = matrices[0].counts.shape
     xmin = matrices[0].xmin
     ymin = matrices[0].ymin
+
     for mat in matrices:
-        if not (np.isclose(mat.binsize, binsize) and np.isclose(mat.counts.shape, shape) and np.isclose(mat.xmin, xmin) and np.isclose(mat.ymin == ymin)):
+        cbinsize = np.isclose(mat.binsize, binsize)
+        cshape = np.all(np.isclose(mat.counts.shape, shape))
+        cxmin = np.isclose(mat.xmin, xmin)
+        cymin = np.isclose(mat.ymin, ymin)
+        if not (cbinsize and cshape and cxmin and cymin):
             raise ValueError("Rainflow matrices must be of same shape and same size")
     pass
 
