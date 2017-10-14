@@ -1,15 +1,25 @@
 import numpy as np
 
-# definition of a class which represents a rainflow matrix
-
 
 class rfm(object):
+    # definition of a class which represents a rainflow matrix
     def __init__(self, counts, binsize, xmin, ymin):
         self.binsize = binsize
         self.xmin = xmin
         self.ymin = ymin
         # counts should be a numpy array
         self.counts = counts
+
+    def extrapolate(self, factor):
+        """Simple extrapolation of a rainflow matrix by a given factor
+
+        Args:
+            factor (float): floating point/integer factor
+
+        Returns:
+            rfm: rainflow matrix object
+        """
+        return rfm(self.counts * factor, self.binsize, self.xmin, self.ymin)
 
 
 def zerosrfm_like(matrix):
@@ -92,19 +102,6 @@ def mulitply(*matrices):
     for mat in matrices:
         output.counts = output.counts * mat.counts
     return output
-
-
-def extrapolate(matrix, factor):
-    """Simple extrapolation of a rainflow matrix by a given factor
-
-    Args:
-        matrix (rfm): Rainflow matrix object
-        factor (float): floating point/integer factor
-
-    Returns:
-        rfm: rainflow matrix object
-    """
-    return rfm(matrix.counts * factor, matrix.binsize, matrix.xmin, matrix.ymin)
 
 
 def rainflow_count(series, min, max, numbins):
