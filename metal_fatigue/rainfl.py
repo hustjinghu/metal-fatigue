@@ -78,7 +78,7 @@ def consistency_check(*matrices):
     xmin = matrices[0].xmin
     ymin = matrices[0].ymin
     for mat in matrices:
-        if not (mat.binsize == binsize and mat.counts.shape == shape and mat.xmin == xmin and mat.ymin == ymin):
+        if not (np.isclose(mat.binsize, binsize) and np.isclose(mat.counts.shape, shape) and np.isclose(mat.xmin, xmin) and np.isclose(mat.ymin == ymin)):
             raise ValueError("Rainflow matrices must be of same shape and same size")
     pass
 
@@ -121,6 +121,7 @@ def rainflow_count(series, min, max, numbins):
     # series to turnuíng points
     bins = np.linspace(min, max, numbins + 1)
     turning_points = np.digitize(series, bins) - 1
+    print(turning_points)
     binsize = bins[1] - bins[0]
     # init empty matrix
     zeros = np.zeros((numbins, numbins))
