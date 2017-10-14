@@ -28,6 +28,12 @@ class from_to(_rfm):
         _rfm.__init__(self, counts, binsize, xmin, ymin, mattype='FromTo')
 
 
+class range_mean(_rfm):
+    # definition of a from-to matrix
+    def __init__(self, counts, binsize, xmin, ymin):
+        _rfm.__init__(self, counts, binsize, xmin, ymin, mattype='RangeMean')
+
+
 def zerosrfm_like(matrix):
     """Generates a rainflow matrix filled with zeroes only on the same scale as matrix
 
