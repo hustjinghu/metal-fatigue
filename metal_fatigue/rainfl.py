@@ -55,7 +55,7 @@ def onesrfm_like(matrix):
     Returns:
         rfm: return rainflow matrix object
     """
-    return rfm(np.ones_like(matrix.counts), matrix.binsize, matrix.xmin, matrix.ymin, matrix.mattype)
+    return _rfm(np.ones_like(matrix.counts), matrix.binsize, matrix.xmin, matrix.ymin, matrix.mattype)
 
 
 def add(*matrices):
