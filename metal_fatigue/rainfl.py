@@ -43,7 +43,7 @@ def zerosrfm_like(matrix):
     Returns:
         rfm: return rainflow matrix object
     """
-    return _rfm(np.zeros_like(matrix.counts), matrix.binsize, matrix.xmin, matrix.ymin)
+    return _rfm(np.zeros_like(matrix.counts), matrix.binsize, matrix.xmin, matrix.ymin, matrix.mattype)
 
 
 def onesrfm_like(matrix):
@@ -55,7 +55,7 @@ def onesrfm_like(matrix):
     Returns:
         rfm: return rainflow matrix object
     """
-    return rfm(np.ones_like(matrix.counts), matrix.binsize, matrix.xmin, matrix.ymin)
+    return rfm(np.ones_like(matrix.counts), matrix.binsize, matrix.xmin, matrix.ymin, matrix.mattype)
 
 
 def add(*matrices):
@@ -89,14 +89,15 @@ def consistency_check(*matrices):
     shape = matrices[0].counts.shape
     xmin = matrices[0].xmin
     ymin = matrices[0].ymin
-
+    mattype = matrices[0].mattype
     for mat in matrices:
         cbinsize = np.isclose(mat.binsize, binsize)
         cshape = np.all(np.isclose(mat.counts.shape, shape))
         cxmin = np.isclose(mat.xmin, xmin)
         cymin = np.isclose(mat.ymin, ymin)
-        if not (cbinsize and cshape and cxmin and cymin):
-            raise ValueError("Rainflow matrices must be of same shape and same size")
+        cmattype = mattype == mat.mattype
+        if not (cbinsize and cshape and cxmin and cymin and cmattype):
+            raise ValueError("Rainflow matrices must be of same shape´, type and same size")
     pass
 
 
@@ -142,7 +143,7 @@ def rainflow_count(series, min, max, numbins):
     binsize = bins[1] - bins[0]
     # init empty matrix
     zeros = np.zeros((numbins, numbins))
-    output = rfm(zeros, binsize, min, min)
+    output = from_to(zeros, binsize, min, min)
 
     cache = []
 
