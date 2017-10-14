@@ -24,34 +24,34 @@ class _rfm(object):
 
     def plot2d(self, **kwargs):
         """2D Colormap plot of the Rainflow matrix
-        
+
         Args:
             **kwargs: Description
-        
+
         Returns:
             TYPE: Description
         """
-        #create fig, ax
+        # create fig, ax
         fig = plt.figure()
         ax = fig.add_subplot((111))
-        #imshow plot
-        cax = ax.imshow(rfm.counts,cmap=plt.get_cmap("Blues"),extent=(rxmin,rxmax,rymin,rymax))
+        # imshow plot
+        cax = ax.imshow(self.counts, cmap=plt.get_cmap("Blues"), extent=(rxmin, rxmax, rymin, rymax), **kwargs)
 
-        #create grid
-        rxmax = rfm.xmin + rfm.binsize * rfm.counts.shape[0]
-        rxmin = rfm.xmin
-        rymax = rfm.ymin + rfm.binsize * rfm.counts.shape[1]
-        rymin = rfm.ymin
-        xticks = np.linspace(rxmin,rxmax,int(np.ceil((rxmax-rxmin)/rfm.binsize+1)))
-        yticks = np.linspace(rymin,rymax,int(np.ceil((rymax-rymin)/rfm.binsize+1)))
-        ax.set_xticks(xticks,minor=True) 
-        ax.set_yticks(yticks,minor=True) 
+        # create grid
+        rxmax = self.xmin + self.binsize * self.counts.shape[0]
+        rxmin = self.xmin
+        rymax = self.ymin + self.binsize * self.counts.shape[1]
+        rymin = self.ymin
+        xticks = np.linspace(rxmin, rxmax, int(np.ceil((rxmax - rxmin) / rfm.binsize + 1)))
+        yticks = np.linspace(rymin, rymax, int(np.ceil((rymax - rymin) / rfm.binsize + 1)))
+        ax.set_xticks(xticks, minor=True)
+        ax.set_yticks(yticks, minor=True)
         ax.grid(which='both')
-        ax.grid(which='minor',alpha = 0.8)
+        ax.grid(which='minor', alpha=0.8)
 
-        #create colorbar
-        fig.colorbar(cax,ticks=np.linspace(0,rfm.counts.max(),10))
-        return fig,ax
+        # create colorbar
+        fig.colorbar(cax, ticks=np.linspace(0, self.counts.max(), 10))
+        return fig, ax
 
 
 class from_to(_rfm):
