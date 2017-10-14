@@ -116,10 +116,10 @@ def rainflow_count(series, min, max, numbins):
         series (numpy array): turning points
         min (float): minimum value of bin
         max (float): maximum value of bin
-        binsize (float): size of bins
+        binsize (float): number of bins in one direction
 
     Returns:
-        rfm: rainflow matrix
+        rfm: rainflow matrix (quadratic form)
     """
     # series to turnuíng points
     bins = np.linspace(min, max, numbins + 1)
