@@ -24,7 +24,7 @@ class _rfm(object):
 
 class from_to(_rfm):
     # definition of a from-to matrix
-    def __init__(self, mattype):
+    def __init__(self, counts, binsize, xmin, ymin):
         _rfm.__init__(self, counts, binsize, xmin, ymin, mattype='FromTo')
 
 
