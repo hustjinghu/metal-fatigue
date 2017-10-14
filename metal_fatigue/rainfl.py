@@ -23,13 +23,34 @@ class _rfm(object):
 
 
 class from_to(_rfm):
-    # definition of a from-to matrix
+    """Rainflow object of type "FromTo"
+
+    Args:
+        counts (numpy array): numpy array of the counts
+        binsize (float): binsize (same for each dimension)
+        xmin (float): minimum value of binedge in 1st dimension
+        ymin (float): minimum value of binedge in 2nd dimension
+
+    Notes: 
+        Binning convention is: bin[i-1] < x <= bin[i]
+    """
+    
     def __init__(self, counts, binsize, xmin, ymin):
         _rfm.__init__(self, counts, binsize, xmin, ymin, mattype='FromTo')
 
 
 class range_mean(_rfm):
-    # definition of a from-to matrix
+    """Rainflow object of type "RangeMean"
+
+    Args:
+        counts (numpy array): numpy array of the counts
+        binsize (float): binsize (same for each dimension)
+        xmin (float): minimum value of binedge in 1st dimension
+        ymin (float): minimum value of binedge in 2nd dimension
+
+    Notes: 
+        Binning convention is: bin[i-1] < x <= bin[i]
+    """
     def __init__(self, counts, binsize, xmin, ymin):
         _rfm.__init__(self, counts, binsize, xmin, ymin, mattype='RangeMean')
 
