@@ -26,28 +26,31 @@ class _rfm(object):
         """2D Colormap plot of the Rainflow matrix
 
         Args:
-            **kwargs: Description
+            **kwargs: **kwargs are passed to plt.imshow()
 
         Returns:
-            TYPE: Description
+            figure: matplotlib figure object
+            axes: matplotlib axes object
         """
         # create fig, ax
         fig = plt.figure()
         ax = fig.add_subplot((111))
-        # imshow plot
-        cax = ax.imshow(self.counts, cmap=plt.get_cmap("Blues"), extent=(rxmin, rxmax, rymin, rymax), **kwargs)
 
-        # create grid
+        # imshow plot
         rxmax = self.xmin + self.binsize * self.counts.shape[0]
         rxmin = self.xmin
         rymax = self.ymin + self.binsize * self.counts.shape[1]
         rymin = self.ymin
-        xticks = np.linspace(rxmin, rxmax, int(np.ceil((rxmax - rxmin) / rfm.binsize + 1)))
-        yticks = np.linspace(rymin, rymax, int(np.ceil((rymax - rymin) / rfm.binsize + 1)))
+        cax = ax.imshow(self.counts, cmap=plt.get_cmap("Blues"), extent=(rxmin, rxmax, rymin, rymax), **kwargs)
+
+        # create grid
+        xticks = np.linspace(rxmin, rxmax, int(np.ceil((rxmax - rxmin) / self.binsize + 1)))
+        yticks = np.linspace(rymin, rymax, int(np.ceil((rymax - rymin) / self.binsize + 1)))
         ax.set_xticks(xticks, minor=True)
         ax.set_yticks(yticks, minor=True)
         ax.grid(which='both')
         ax.grid(which='minor', alpha=0.8)
+        ax.grid(which='major', alpha=0)
 
         # create colorbar
         fig.colorbar(cax, ticks=np.linspace(0, self.counts.max(), 10))
@@ -177,7 +180,7 @@ def mulitply(*matrices):
 
 
 def rainflow_count(series, min, max, numbins):
-    """Performs rainflow cycle counting and digitizing on a turning point series. Counting occurs according to ASTM E1049 − 85 (2017).
+    """Performs rainflow cycle counting and digitizing on a turning point series. Counting is done according to ASTM E1049 − 85 (2017).
     (Adds a bin if (max-min)/binsize is not an integer)
 
 
@@ -188,7 +191,7 @@ def rainflow_count(series, min, max, numbins):
         binsize (float): number of bins in one direction
 
     Returns:
-        rfm: rainflow matrix (quadratic form)
+        rfm: from-to rainflow matrix
     """
     # series to turnuíng points
     bins = np.linspace(min, max, numbins + 1)
