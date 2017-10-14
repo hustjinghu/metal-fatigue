@@ -43,17 +43,18 @@ class _rfm(object):
         rymin = self.ymin
         cax = ax.imshow(self.counts, cmap=plt.get_cmap("Blues"), extent=(rxmin, rxmax, rymin, rymax), **kwargs)
 
+        # create colorbar
+        fig.colorbar(cax, ticks=np.linspace(0, self.counts.max(), 10))
+
         # create grid
         xticks = np.linspace(rxmin, rxmax, int(np.ceil((rxmax - rxmin) / self.binsize + 1)))
         yticks = np.linspace(rymin, rymax, int(np.ceil((rymax - rymin) / self.binsize + 1)))
         ax.set_xticks(xticks, minor=True)
         ax.set_yticks(yticks, minor=True)
         ax.grid(which='both')
-        ax.grid(which='minor', alpha=0.8)
+        ax.grid(which='minor', alpha=0.8, linewidth=0.3)
         ax.grid(which='major', alpha=0)
 
-        # create colorbar
-        fig.colorbar(cax, ticks=np.linspace(0, self.counts.max(), 10))
         return fig, ax
 
 
