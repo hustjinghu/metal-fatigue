@@ -41,7 +41,8 @@ class _rfm(object):
         rxmin = self.xmin
         rymax = self.ymin + self.binsize * self.counts.shape[1]
         rymin = self.ymin
-        cax = ax.imshow(self.counts, cmap=plt.get_cmap("Blues"), extent=(rxmin, rxmax, rymin, rymax), **kwargs)
+        # flip 0-axis to generate convenient plot
+        cax = ax.imshow(np.flip(self.counts, 0), cmap=plt.get_cmap("Blues"), extent=(rxmin, rxmax, rymin, rymax), **kwargs)
 
         # create colorbar
         fig.colorbar(cax, ticks=np.linspace(0, self.counts.max(), 10))
@@ -55,6 +56,14 @@ class _rfm(object):
         ax.grid(which='minor', alpha=0.8, linewidth=0.3)
         ax.grid(which='major', alpha=0)
 
+        if self.mattype == 'FromTo':
+            ylabel = 'From'
+            xlabel = 'To'
+        elif self.mattype == 'RangeMean':
+            ylabel = 'Range'
+            xlabel = 'Mean'
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
         return fig, ax
 
 
@@ -212,13 +221,12 @@ def rainflow_count(series, min, max, numbins):
         # step 1
         cache.append(point)
         # step 6
-        if i == (np.size(turning_points) - 1):
+        if i == (len(turning_points) - 1):
             while len(cache) > 1:
                 Y = [cache[-2], cache[-1]]
                 count_helper(0.5)
                 cache.pop()
             break
-
         while len(cache) >= 3:
             # step 2
             X = [cache[-2], cache[-1]]
