@@ -23,6 +23,9 @@ class _rfm(object):
         """
         return _rfm(self.counts * factor, self.binsize, self.xmin, self.ymin, self.mattype)
 
+    def rebin(self, binsize, xmin, ymin):
+        pass
+
     def plot2d(self, **kwargs):
         """2D Colormap plot of the Rainflow matrix
 
@@ -84,6 +87,9 @@ class from_to(_rfm):
     def __init__(self, counts, binsize, xmin, ymin):
         _rfm.__init__(self, counts, binsize, xmin, ymin, mattype='FromTo')
 
+    def to_range_mean():
+        pass
+
 
 class range_mean(_rfm):
     """Rainflow object of type "RangeMean"
@@ -100,6 +106,9 @@ class range_mean(_rfm):
 
     def __init__(self, counts, binsize, xmin, ymin):
         _rfm.__init__(self, counts, binsize, xmin, ymin, mattype='RangeMean')
+
+    def to_from_to():
+        pass
 
 
 def zerosrfm_like(matrix):
