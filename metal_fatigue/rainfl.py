@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
+import warnings
 
 class _rfm(object):
     # definition of a class which represents a rainflow matrix
@@ -41,8 +41,7 @@ class _rfm(object):
         rxmin = self.xmin
         rymax = self.ymin + self.binsize * self.counts.shape[1]
         rymin = self.ymin
-        # flip 0-axis to generate convenient plot
-        cax = ax.imshow(np.flip(self.counts, 0), cmap=plt.get_cmap("Blues"), extent=(rxmin, rxmax, rymin, rymax), **kwargs)
+        cax = ax.imshow(self.counts, cmap=plt.get_cmap("Blues"), extent=(rxmin, rxmax, rymax, rymin), **kwargs)
 
         # create colorbar
         fig.colorbar(cax, ticks=np.linspace(0, self.counts.max(), 10))
@@ -55,7 +54,8 @@ class _rfm(object):
         ax.grid(which='both')
         ax.grid(which='minor', alpha=0.8, linewidth=0.3)
         ax.grid(which='major', alpha=0)
-
+        ax.xaxis.tick_top()
+        ax.xaxis.set_label_position('top')
         if self.mattype == 'FromTo':
             ylabel = 'From'
             xlabel = 'To'
@@ -203,6 +203,10 @@ def rainflow_count(series, min, max, numbins):
     Returns:
         rfm: from-to rainflow matrix
     """
+    # warning, if overflow
+    if min > np.min(series) or max < np.max(series):
+        warnings.warn("Matrix overflow. Check min and max values.")
+
     # series to turnuíng points
     bins = np.linspace(min, max, numbins + 1)
     turning_points = np.digitize(series, bins) - 1
