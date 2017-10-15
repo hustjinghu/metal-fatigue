@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import warnings
 
+
 class _rfm(object):
     # definition of a class which represents a rainflow matrix
     def __init__(self, counts, binsize, xmin, ymin, mattype):
@@ -191,7 +192,6 @@ def mulitply(*matrices):
 
 def rainflow_count(series, min, max, numbins):
     """Performs rainflow cycle counting and digitizing on a turning point series. Counting is done according to ASTM E1049 − 85 (2017).
-    (Adds a bin if (max-min)/binsize is not an integer)
 
 
     Args:
@@ -204,7 +204,7 @@ def rainflow_count(series, min, max, numbins):
         rfm: from-to rainflow matrix
     """
     # warning, if overflow
-    if min > np.min(series) or max < np.max(series):
+    if min > np.min(series) or max <= np.max(series):
         warnings.warn("Matrix overflow. Check min and max values.")
 
     # series to turnuíng points
