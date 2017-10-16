@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import warnings
 
 
 class _rfm(object):
@@ -22,6 +23,9 @@ class _rfm(object):
         """
         return _rfm(self.counts * factor, self.binsize, self.xmin, self.ymin, self.mattype)
 
+    def rebin(self, binsize, xmin, ymin):
+        pass
+
     def plot2d(self, **kwargs):
         """2D Colormap plot of the Rainflow matrix
 
@@ -41,8 +45,7 @@ class _rfm(object):
         rxmin = self.xmin
         rymax = self.ymin + self.binsize * self.counts.shape[1]
         rymin = self.ymin
-        # flip 0-axis to generate convenient plot
-        cax = ax.imshow(np.flip(self.counts, 0), cmap=plt.get_cmap("Blues"), extent=(rxmin, rxmax, rymin, rymax), **kwargs)
+        cax = ax.imshow(self.counts, cmap=plt.get_cmap("Blues"), extent=(rxmin, rxmax, rymax, rymin), **kwargs)
 
         # create colorbar
         fig.colorbar(cax, ticks=np.linspace(0, self.counts.max(), 10))
@@ -55,7 +58,8 @@ class _rfm(object):
         ax.grid(which='both')
         ax.grid(which='minor', alpha=0.8, linewidth=0.3)
         ax.grid(which='major', alpha=0)
-
+        ax.xaxis.tick_top()
+        ax.xaxis.set_label_position('top')
         if self.mattype == 'FromTo':
             ylabel = 'From'
             xlabel = 'To'
@@ -83,6 +87,9 @@ class from_to(_rfm):
     def __init__(self, counts, binsize, xmin, ymin):
         _rfm.__init__(self, counts, binsize, xmin, ymin, mattype='FromTo')
 
+    def to_range_mean():
+        pass
+
 
 class range_mean(_rfm):
     """Rainflow object of type "RangeMean"
@@ -99,6 +106,9 @@ class range_mean(_rfm):
 
     def __init__(self, counts, binsize, xmin, ymin):
         _rfm.__init__(self, counts, binsize, xmin, ymin, mattype='RangeMean')
+
+    def to_from_to():
+        pass
 
 
 def zerosrfm_like(matrix):
@@ -191,7 +201,6 @@ def mulitply(*matrices):
 
 def rainflow_count(series, min, max, numbins):
     """Performs rainflow cycle counting and digitizing on a turning point series. Counting is done according to ASTM E1049 − 85 (2017).
-    (Adds a bin if (max-min)/binsize is not an integer)
 
 
     Args:
@@ -203,6 +212,10 @@ def rainflow_count(series, min, max, numbins):
     Returns:
         rfm: from-to rainflow matrix
     """
+    # warning, if overflow
+    if min > np.min(series) or max <= np.max(series):
+        warnings.warn("Matrix overflow. Check min and max values.")
+
     # series to turnuíng points
     bins = np.linspace(min, max, numbins + 1)
     turning_points = np.digitize(series, bins) - 1
