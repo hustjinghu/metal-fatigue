@@ -5,12 +5,12 @@ import warnings
 
 class _rfm(object):
     # definition of a class which represents a rainflow matrix
-    def __init__(self, counts, binsize, xmin, ymin, mattype):
+    def __init__(self, counts, binsize, xmin, ymin, matrixtype):
         self.binsize = binsize
         self.xmin = xmin
         self.ymin = ymin
         self.counts = counts
-        self.mattype = mattype
+        self.matrixtype = matrixtype
 
     def extrapolate(self, factor):
         """Simple extrapolation of a rainflow matrix by a given factor
@@ -21,7 +21,7 @@ class _rfm(object):
         Returns:
             rfm: rainflow matrix object
         """
-        return _rfm(self.counts * factor, self.binsize, self.xmin, self.ymin, self.mattype)
+        return _rfm(self.counts * factor, self.binsize, self.xmin, self.ymin, self.matrixtype)
 
     def rebin(self, binsize, xmin, ymin):
         pass
@@ -60,10 +60,10 @@ class _rfm(object):
         ax.grid(which='major', alpha=0)
         ax.xaxis.tick_top()
         ax.xaxis.set_label_position('top')
-        if self.mattype == 'FromTo':
+        if self.matrixtype == 'FromTo':
             ylabel = 'From'
             xlabel = 'To'
-        elif self.mattype == 'RangeMean':
+        elif self.matrixtype == 'RangeMean':
             ylabel = 'Range'
             xlabel = 'Mean'
         ax.set_xlabel(xlabel)
@@ -85,7 +85,7 @@ class from_to(_rfm):
     """
 
     def __init__(self, counts, binsize, xmin, ymin):
-        _rfm.__init__(self, counts, binsize, xmin, ymin, mattype='FromTo')
+        _rfm.__init__(self, counts, binsize, xmin, ymin, matrixtype='FromTo')
 
     def to_range_mean():
         pass
@@ -105,7 +105,7 @@ class range_mean(_rfm):
     """
 
     def __init__(self, counts, binsize, xmin, ymin):
-        _rfm.__init__(self, counts, binsize, xmin, ymin, mattype='RangeMean')
+        _rfm.__init__(self, counts, binsize, xmin, ymin, matrixtype='RangeMean')
 
     def to_from_to():
         pass
@@ -120,7 +120,7 @@ def zerosrfm_like(matrix):
     Returns:
         rfm: return rainflow matrix object
     """
-    return _rfm(np.zeros_like(matrix.counts), matrix.binsize, matrix.xmin, matrix.ymin, matrix.mattype)
+    return _rfm(np.zeros_like(matrix.counts), matrix.binsize, matrix.xmin, matrix.ymin, matrix.matrixtype)
 
 
 def onesrfm_like(matrix):
@@ -132,7 +132,7 @@ def onesrfm_like(matrix):
     Returns:
         rfm: return rainflow matrix object
     """
-    return _rfm(np.ones_like(matrix.counts), matrix.binsize, matrix.xmin, matrix.ymin, matrix.mattype)
+    return _rfm(np.ones_like(matrix.counts), matrix.binsize, matrix.xmin, matrix.ymin, matrix.matrixtype)
 
 
 def add(*matrices):
