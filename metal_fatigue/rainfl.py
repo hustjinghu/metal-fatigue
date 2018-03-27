@@ -3,28 +3,43 @@ import matplotlib.pyplot as plt
 import warnings
 
 
-class _rfm(object):
-    # definition of a class which represents a rainflow matrix
-    def __init__(self, counts, binsize, xmin, ymin, matrixtype):
+class binned(object):
+    def __init__(self, counts, binsize, minvalue):
         self.binsize = binsize
-        self.xmin = xmin
-        self.ymin = ymin
+        self.minvalue = minvalue
         self.counts = counts
-        self.matrixtype = matrixtype
 
-    def mulitply_factor(self, factor):
+    def mulitply_constant(self, constant):
         """Simple multiplication of a rainflow matrix with a given factor
 
         Args:
-            factor (float): floating point/integer factor
+            constant (float): floating point/integer factor
 
         Returns:
             rfm: rainflow matrix object
         """
-        return _rfm(self.counts * factor, self.binsize, self.xmin, self.ymin, self.matrixtype)
+        return binned(self.counts * factor, self.binsize, self.minvalue)
+
+    def add_constant(self, constant):
+        """Simple multiplication of a rainflow matrix with a given factor
+
+        Args:
+            constant (float): floating point/integer factor
+
+        Returns:
+            rfm: rainflow matrix object
+        """
+        return binned(self.counts + factor, self.binsize, self.minvalue)
 
     def rebin(self, binsize, xmin, ymin):
         pass
+
+
+class _rfm(binned):
+    # definition of a class which represents a rainflow matrix
+    def __init__(self, counts, binsize, minvalue, matrixtype):
+        binned.__init__(self, counts, binsize=np.array([binsize, binsize]), minvalue=np.array([xmin, ymin]))
+        self.matrixtype = matrixtype
 
     def plot2d(self, **kwargs):
         """2D Colormap plot of the Rainflow matrix
@@ -120,7 +135,7 @@ def zerosrfm_like(matrix):
     Returns:
         rfm: return rainflow matrix object
     """
-    return _rfm(np.zeros_like(matrix.counts), matrix.binsize, matrix.xmin, matrix.ymin, matrix.matrixtype)
+    return binned(np.zeros_like(matrix.counts), matrix.binsize, matrix.minvalue)
 
 
 def onesrfm_like(matrix):
@@ -132,7 +147,7 @@ def onesrfm_like(matrix):
     Returns:
         rfm: return rainflow matrix object
     """
-    return _rfm(np.ones_like(matrix.counts), matrix.binsize, matrix.xmin, matrix.ymin, matrix.matrixtype)
+    return _rfm(np.ones_like(matrix.counts), matrix.binsize, matrix.minvalue)
 
 
 def add(*matrices):
