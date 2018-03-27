@@ -12,8 +12,8 @@ class _rfm(object):
         self.counts = counts
         self.matrixtype = matrixtype
 
-    def extrapolate(self, factor):
-        """Simple extrapolation of a rainflow matrix by a given factor
+    def mulitply_factor(self, factor):
+        """Simple multiplication of a rainflow matrix with a given factor
 
         Args:
             factor (float): floating point/integer factor
