@@ -7,7 +7,7 @@ class binned(object):
     def __init__(self, counts, binsize, minvalue):
         self.binsize = binsize
         self.minvalue = minvalue
-        self.counts = counts
+        self.values = values
 
     def mulitply_constant(self, constant):
         """Simple multiplication of a rainflow matrix with a given factor
@@ -18,7 +18,7 @@ class binned(object):
         Returns:
             rfm: rainflow matrix object
         """
-        return binned(self.counts * factor, self.binsize, self.minvalue)
+        return binned(self.values * factor, self.binsize, self.minvalue)
 
     def add_constant(self, constant):
         """Simple multiplication of a rainflow matrix with a given factor
@@ -29,7 +29,7 @@ class binned(object):
         Returns:
             rfm: rainflow matrix object
         """
-        return binned(self.counts + factor, self.binsize, self.minvalue)
+        return binned(self.values + factor, self.binsize, self.minvalue)
 
     def rebin(self, binsize, xmin, ymin):
         pass
@@ -38,7 +38,7 @@ class binned(object):
 class _rfm(binned):
     # definition of a class which represents a rainflow matrix
     def __init__(self, counts, binsize, minvalue, matrixtype):
-        binned.__init__(self, counts, binsize=np.array([binsize, binsize]), minvalue=np.array([xmin, ymin]))
+        binned.__init__(self, values=counts, binsize=np.array([binsize, binsize]), minvalue=np.array([xmin, ymin]))
         self.matrixtype = matrixtype
 
     def plot2d(self, **kwargs):
@@ -214,32 +214,11 @@ def mulitply(*matrices):
     return output
 
 
-def rainflow_count(series, min, max, numbins):
-    """Performs rainflow cycle counting and digitizing on a turning point series. Counting is done according to ASTM E1049 − 85 (2017).
-
-
-    Args:
-        series (numpy array): turning points
-        min (float): minimum value of bin
-        max (float): maximum value of bin
-        binsize (float): number of bins in one direction
-
-    Returns:
-        rfm: from-to rainflow matrix
-    """
-    # warning, if overflow
-    if min > np.min(series) or max <= np.max(series):
-        warnings.warn("Matrix overflow. Check min and max values.")
-
-    # series to turnuíng points
-    bins = np.linspace(min, max, numbins + 1)
-    turning_points = np.digitize(series, bins) - 1
-    binsize = bins[1] - bins[0]
+def rainflow(turning_points, cache=[]):
     # init empty matrix
+    numbins = turning_points.values.size()
     zeros = np.zeros((numbins, numbins))
     output = from_to(zeros, binsize, min, min)
-
-    cache = []
 
     def count_helper(cycles):
         i = Y[0]
@@ -276,3 +255,18 @@ def rainflow_count(series, min, max, numbins):
             cache.pop()
             cache.reverse()
     return output
+
+
+def series_to_hist(series, minvalue, maxvalue, binsize):
+    # warning, if overflow
+    if min > np.min(series) or max <= np.max(series):
+        warnings.warn("Matrix overflow. Check min and max values.")
+
+    # series to turnuíng points
+    bins = np.linspace(min, max, numbins + 1)
+    dig = np.digitize(series, bins) - 1
+    binsize = bins[1] - bins[0]
+
+    hist = binned(dig, binsize, minvalue)
+
+    return hist
