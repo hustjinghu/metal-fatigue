@@ -277,3 +277,11 @@ def bin_series(series, minvalue, maxvalue, numbins):
     hist = binned(dig, binsize, minvalue, numbins)
 
     return hist
+
+
+def turning_point_ind(series):
+    diff = np.diff(series)
+    index = np.nonzero(diff[1:] * diff[:-1] < 0)[0] + 1
+    # handling fisrt and last point
+    index = np.insert(index, [0, len(index)], [0, len(series) - 1])
+    return index
