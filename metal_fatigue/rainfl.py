@@ -5,6 +5,15 @@ import warnings
 
 class binned(object):
     def __init__(self, values, binsize, minvalue, numbins):
+        """Definition of binned object
+        Args:
+            value (numpy array): numpy array, can be counts (for example in a rfm or a binned time series)
+            binsize (float): binsize (same for each dimension)
+            minvalue (numpy array): minimum value of bin edge of each dimension
+            numbins (numpy array): number of bins of each dimension
+        Notes:
+            Binning convention is: bin[i-1] < x <= bin[i]
+        """
         self.binsize = binsize
         self.minvalue = minvalue
         self.values = values
@@ -37,8 +46,18 @@ class binned(object):
 
 
 class _rfm(binned):
-    # definition of a class which represents a rainflow matrix
     def __init__(self, counts, binsize, xmin, ymin, matrixtype):
+        """Definition of a class which represents a rainflow matrix
+
+        Args:
+            counts (numpy array): numpy array of the counts
+            binsize (float): binsize (same for each dimension)
+            xmin (float): minimum value of bin edge in 1st dimension
+            ymin (float): minimum value of bin edge in 2nd dimension
+            matrixtype (string): type of rfm (FromTo/RangeMean)
+        Notes:
+            Binning convention is: bin[i-1] < x <= bin[i]
+        """
         numbins = counts.shape[0]
         binned.__init__(self, values=counts, numbins=numbins, binsize=np.array([binsize, binsize]), minvalue=np.array([xmin, ymin]))
         self.xmin = xmin
@@ -91,19 +110,18 @@ class _rfm(binned):
 
 
 class from_to(_rfm):
-    """Rainflow object of type "FromTo"
-
-    Args:
-        counts (numpy array): numpy array of the counts
-        binsize (float): binsize (same for each dimension)
-        xmin (float): minimum value of binedge in 1st dimension
-        ymin (float): minimum value of binedge in 2nd dimension
-
-    Notes: 
-        Binning convention is: bin[i-1] < x <= bin[i]
-    """
-
     def __init__(self, counts, binsize, xmin, ymin):
+            """Rainflow object of type "FromTo"
+
+            Args:
+                counts (numpy array): numpy array of the counts
+                binsize (float): binsize (same for each dimension)
+                xmin (float): minimum value of bin edge in 1st dimension
+                ymin (float): minimum value of bin edge in 2nd dimension
+
+            Notes:
+                Binning convention is: bin[i-1] < x <= bin[i]
+            """
         _rfm.__init__(self, counts=counts, binsize=binsize, xmin=xmin, ymin=ymin, matrixtype='FromTo')
 
     def to_range_mean():
@@ -116,8 +134,8 @@ class range_mean(_rfm):
     Args:
         counts (numpy array): numpy array of the counts
         binsize (float): binsize (same for each dimension)
-        xmin (float): minimum value of binedge in 1st dimension
-        ymin (float): minimum value of binedge in 2nd dimension
+        xmin (float): minimum value of bin edge in 1st dimension
+        ymin (float): minimum value of bin edge in 2nd dimension
 
     Notes: 
         Binning convention is: bin[i-1] < x <= bin[i]
@@ -193,7 +211,7 @@ def consistency_check(*matrices):
         cymin = np.isclose(mat.ymin, ymin)
         cmattype = mattype == mat.mattype
         if not (cbinsize and cshape and cxmin and cymin and cmattype):
-            raise ValueError("Rainflow matrices must be of same shape´, type and same size")
+            raise ValueError("Rainflow matrices must be of the same shape, type and size")
     pass
 
 
@@ -219,6 +237,22 @@ def mulitply(*matrices):
 
 
 def rainflow(turning_points, cache=[], minvalue=None, numbins=128, binsize=None):
+    """Rainflow cycle counting according to according to ASTM E1049 − 85 (2017)
+    
+    Args:
+        turning_points (numpy array): turning points (binned) of the signal
+        cache (list, optional): cache from last counting iteration
+        minvalue (None, optional): minimum value of bin edge
+        numbins (int, optional): Description
+        binsize (None, optional): Description
+    
+    Returns:
+        rfm object: FromTo rainflow matrix object
+        list: cache (residuum) from counting
+
+    Notes:
+        Binning convention is: bin[i-1] < x <= bin[i]
+    """
     # init empty matrix
     if not minvalue:
         minvalue = np.min(turning_points)
@@ -261,10 +295,21 @@ def rainflow(turning_points, cache=[], minvalue=None, numbins=128, binsize=None)
             cache.reverse()
             cache.pop()
             cache.reverse()
-    return output
+    return output, cache
 
 
 def bin_series(series, minvalue, maxvalue, numbins):
+    """Digitize (bin) data
+    
+    Args:
+        series (numpy array): numpy array to digitize
+        minvalue (float): minimum value of bin edge
+        maxvalue (float): maximum value of bin edge
+        numbins (int): number of bins
+    
+    Returns:
+        binned object: binned data
+    """
     # warning, if overflow
     if minvalue > np.min(series) or maxvalue <= np.max(series):
         warnings.warn("Matrix overflow. Check min and max values.")
@@ -273,13 +318,19 @@ def bin_series(series, minvalue, maxvalue, numbins):
     bins = np.linspace(minvalue, maxvalue, numbins + 1)
     dig = np.digitize(series, bins) - 1
     binsize = bins[1] - bins[0]
-
     hist = binned(dig, binsize, minvalue, numbins)
-
     return hist
 
 
 def turning_point_ind(series):
+    """Get index of turning points in time series
+    
+    Args:
+        series (numpy array): data to evaluate
+    
+    Returns:
+        numpy array: index of turning points in series
+    """
     diff = np.diff(series)
     index = np.nonzero(diff[1:] * diff[:-1] < 0)[0] + 1
     # handling fisrt and last point
