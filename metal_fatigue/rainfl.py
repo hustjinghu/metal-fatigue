@@ -4,12 +4,13 @@ import warnings
 
 
 class binned(object):
-    def __init__(self, counts, binsize, minvalue):
+    def __init__(self, values, binsize, minvalue, numbins):
         self.binsize = binsize
         self.minvalue = minvalue
         self.values = values
+        self.numbins = numbins
 
-    def mulitply_constant(self, constant):
+    def multiply_constant(self, constant):
         """Simple multiplication of a rainflow matrix with a given factor
 
         Args:
@@ -18,7 +19,7 @@ class binned(object):
         Returns:
             rfm: rainflow matrix object
         """
-        return binned(self.values * factor, self.binsize, self.minvalue)
+        return binned(self.values * constant, self.binsize, self.minvalue)
 
     def add_constant(self, constant):
         """Simple multiplication of a rainflow matrix with a given factor
@@ -29,7 +30,7 @@ class binned(object):
         Returns:
             rfm: rainflow matrix object
         """
-        return binned(self.values + factor, self.binsize, self.minvalue)
+        return binned(self.values + constant, self.binsize, self.minvalue)
 
     def rebin(self, binsize, xmin, ymin):
         pass
@@ -37,8 +38,11 @@ class binned(object):
 
 class _rfm(binned):
     # definition of a class which represents a rainflow matrix
-    def __init__(self, counts, binsize, minvalue, matrixtype):
-        binned.__init__(self, values=counts, binsize=np.array([binsize, binsize]), minvalue=np.array([xmin, ymin]))
+    def __init__(self, counts, binsize, xmin, ymin, matrixtype):
+        numbins = counts.shape[0]
+        binned.__init__(self, values=counts, numbins=numbins, binsize=np.array([binsize, binsize]), minvalue=np.array([xmin, ymin]))
+        self.xmin = xmin
+        self.ymin = ymin
         self.matrixtype = matrixtype
 
     def plot2d(self, **kwargs):
@@ -100,7 +104,7 @@ class from_to(_rfm):
     """
 
     def __init__(self, counts, binsize, xmin, ymin):
-        _rfm.__init__(self, counts, binsize, xmin, ymin, matrixtype='FromTo')
+        _rfm.__init__(self, counts=counts, binsize=binsize, xmin=xmin, ymin=ymin, matrixtype='FromTo')
 
     def to_range_mean():
         pass
@@ -120,7 +124,7 @@ class range_mean(_rfm):
     """
 
     def __init__(self, counts, binsize, xmin, ymin):
-        _rfm.__init__(self, counts, binsize, xmin, ymin, matrixtype='RangeMean')
+        _rfm.__init__(self, counts=counts, binsize=binsize, xmin=xmin, ymin=ymin, matrixtype='RangeMean')
 
     def to_from_to():
         pass
@@ -150,7 +154,7 @@ def onesrfm_like(matrix):
     return _rfm(np.ones_like(matrix.counts), matrix.binsize, matrix.minvalue)
 
 
-def add(*matrices):
+def addrfm(*matrices):
     """Adds two or more rainflow matrices
 
     Args:
@@ -214,11 +218,14 @@ def mulitply(*matrices):
     return output
 
 
-def rainflow(turning_points, cache=[]):
+def rainflow(turning_points, cache=[], minvalue=None, numbins=128, binsize=None):
     # init empty matrix
-    numbins = turning_points.values.size()
+    if not minvalue:
+        minvalue = np.min(turning_points)
+    if not binsize:
+        binsize = (np.max(turning_points) - minvalue) / numbins
     zeros = np.zeros((numbins, numbins))
-    output = from_to(zeros, binsize, min, min)
+    output = from_to(zeros, binsize, minvalue, minvalue)
 
     def count_helper(cycles):
         i = Y[0]
@@ -257,16 +264,16 @@ def rainflow(turning_points, cache=[]):
     return output
 
 
-def series_to_hist(series, minvalue, maxvalue, binsize):
+def bin_series(series, minvalue, maxvalue, numbins):
     # warning, if overflow
-    if min > np.min(series) or max <= np.max(series):
+    if minvalue > np.min(series) or maxvalue <= np.max(series):
         warnings.warn("Matrix overflow. Check min and max values.")
 
     # series to turnuíng points
-    bins = np.linspace(min, max, numbins + 1)
+    bins = np.linspace(minvalue, maxvalue, numbins + 1)
     dig = np.digitize(series, bins) - 1
     binsize = bins[1] - bins[0]
 
-    hist = binned(dig, binsize, minvalue)
+    hist = binned(dig, binsize, minvalue, numbins)
 
     return hist
