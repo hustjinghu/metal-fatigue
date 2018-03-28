@@ -4,20 +4,22 @@ import warnings
 
 
 class binned(object):
-    def __init__(self, values, binsize, minvalue, numbins):
+    def __init__(self, values, binsize, minvalue, numbins, bins):
         """Definition of binned object
         Args:
             value (numpy array): numpy array, can be counts (for example in a rfm or a binned time series)
             binsize (float): binsize (same for each dimension)
-            minvalue (numpy array): minimum value of bin edge of each dimension
-            numbins (numpy array): number of bins of each dimension
+            minvalue (numpy array): minimum value for bin edge of each dimension
+            numbins (numpy array): number of bins for each dimension
+            bins (numpy array): array of bin edges for each dimension
         Notes:
-            Binning convention is: bin[i-1] < x <= bin[i]
+            Binning convention is: bins[i-1] <= x < bins[i]
         """
         self.binsize = binsize
         self.minvalue = minvalue
         self.values = values
         self.numbins = numbins
+        self.bins = bins
 
     def multiply_constant(self, constant):
         """Simple multiplication of a rainflow matrix with a given factor
@@ -46,7 +48,7 @@ class binned(object):
 
 
 class _rfm(binned):
-    def __init__(self, counts, binsize, xmin, ymin, matrixtype):
+    def __init__(self, counts, binsize, bins, xmin, ymin, matrixtype):
         """Definition of a class which represents a rainflow matrix
 
         Args:
@@ -55,11 +57,13 @@ class _rfm(binned):
             xmin (float): minimum value of bin edge in 1st dimension
             ymin (float): minimum value of bin edge in 2nd dimension
             matrixtype (string): type of rfm (FromTo/RangeMean)
+            bins (numpy array): array of bin edges for each dimension
         Notes:
-            Binning convention is: bin[i-1] < x <= bin[i]
+            Binning convention is: bins[i-1] <= x < bins[i]
         """
         numbins = counts.shape[0]
-        binned.__init__(self, values=counts, numbins=numbins, binsize=np.array([binsize, binsize]), minvalue=np.array([xmin, ymin]))
+        binned.__init__(self, values=counts, numbins=numbins, binsize=np.array([binsize, binsize]),
+                        minvalue=np.array([xmin, ymin]), bins=np.array([bins, bins]))
         self.xmin = xmin
         self.ymin = ymin
         self.matrixtype = matrixtype
@@ -79,18 +83,18 @@ class _rfm(binned):
         ax = fig.add_subplot((111))
 
         # imshow plot
-        rxmax = self.xmin + self.binsize * self.counts.shape[0]
+        rxmax = self.xmin + self.binsize[0] * self.values.shape[0]
         rxmin = self.xmin
-        rymax = self.ymin + self.binsize * self.counts.shape[1]
+        rymax = self.ymin + self.binsize[0] * self.values.shape[1]
         rymin = self.ymin
-        cax = ax.imshow(self.counts, cmap=plt.get_cmap("Blues"), extent=(rxmin, rxmax, rymax, rymin), **kwargs)
+        cax = ax.imshow(self.values, cmap=plt.get_cmap("Blues"), extent=(rxmin, rxmax, rymax, rymin), **kwargs)
 
         # create colorbar
-        fig.colorbar(cax, ticks=np.linspace(0, self.counts.max(), 10))
+        fig.colorbar(cax, ticks=np.linspace(0, self.values.max(), 10))
 
         # create grid
-        xticks = np.linspace(rxmin, rxmax, int(np.ceil((rxmax - rxmin) / self.binsize + 1)))
-        yticks = np.linspace(rymin, rymax, int(np.ceil((rymax - rymin) / self.binsize + 1)))
+        xticks = np.linspace(rxmin, rxmax, int(np.ceil((rxmax - rxmin) / self.binsize[0] + 1)))
+        yticks = np.linspace(rymin, rymax, int(np.ceil((rymax - rymin) / self.binsize[0] + 1)))
         ax.set_xticks(xticks, minor=True)
         ax.set_yticks(yticks, minor=True)
         ax.grid(which='both')
@@ -110,7 +114,7 @@ class _rfm(binned):
 
 
 class from_to(_rfm):
-    def __init__(self, counts, binsize, xmin, ymin):
+    def __init__(self, counts, binsize, bins, xmin, ymin):
         """Rainflow object of type "FromTo"
 
         Args:
@@ -118,11 +122,13 @@ class from_to(_rfm):
             binsize (float): binsize (same for each dimension)
             xmin (float): minimum value of bin edge in 1st dimension
             ymin (float): minimum value of bin edge in 2nd dimension
+            bins (numpy array): array of bin edges for each dimension
 
         Notes:
-            Binning convention is: bin[i-1] < x <= bin[i]
+            Binning convention is: bins[i-1] <= x < bins[i]
         """
-        _rfm.__init__(self, counts=counts, binsize=binsize, xmin=xmin, ymin=ymin, matrixtype='FromTo')
+        _rfm.__init__(self, counts=counts, binsize=binsize, xmin=xmin, ymin=ymin,
+                      bins=np.array([bins, bins]), matrixtype='FromTo')
 
     def to_range_mean():
         pass
@@ -137,11 +143,13 @@ class range_mean(_rfm):
             binsize (float): binsize (same for each dimension)
             xmin (float): minimum value of bin edge in 1st dimension
             ymin (float): minimum value of bin edge in 2nd dimension
+            bins (numpy array): array of bin edges for each dimension
 
         Notes: 
-            Binning convention is: bin[i-1] < x <= bin[i]
+            Binning convention is: bins[i-1] <= x < bins[i]
         """
-        _rfm.__init__(self, counts=counts, binsize=binsize, xmin=xmin, ymin=ymin, matrixtype='RangeMean')
+        _rfm.__init__(self, counts=counts, binsize=binsize, xmin=xmin, ymin=ymin,
+                      bins=np.array([bins, bins]), matrixtype='RangeMean')
 
     def to_from_to():
         pass
@@ -188,7 +196,7 @@ def addrfm(*matrices):
 
     # summing up the matrix entries
     for mat in matrices:
-        output.counts = output.counts + mat.counts
+        output.values = output.values + mat.values
     return output
 
 
@@ -199,13 +207,13 @@ def consistency_check(*matrices):
         *matrices: Rainflow matrices to compare.
     """
     binsize = matrices[0].binsize
-    shape = matrices[0].counts.shape
+    shape = matrices[0].values.shape
     xmin = matrices[0].xmin
     ymin = matrices[0].ymin
     mattype = matrices[0].mattype
     for mat in matrices:
         cbinsize = np.isclose(mat.binsize, binsize)
-        cshape = np.all(np.isclose(mat.counts.shape, shape))
+        cshape = np.all(np.isclose(mat.values.shape, shape))
         cxmin = np.isclose(mat.xmin, xmin)
         cymin = np.isclose(mat.ymin, ymin)
         cmattype = mattype == mat.mattype
@@ -221,7 +229,7 @@ def mulitply(*matrices):
         *matrices: Rainflow matrices to multiply. Must be the same size.
 
     Returns:
-        rfm: return rainflow matrix object
+        rfm: rainflow matrix object
     """
     # check, if matrices are of the same size and shape
     consistency_check(*matrices)
@@ -231,70 +239,105 @@ def mulitply(*matrices):
 
     # multiplication of the matrix entries
     for mat in matrices:
-        output.counts = output.counts * mat.counts
+        output.values = output.values * mat.values
     return output
 
 
-def rainflow(turning_points, cache=[], minvalue=None, numbins=128, binsize=None):
-    """Rainflow cycle counting according to according to ASTM E1049 − 85 (2017)
+def _rainflow_counting_core(point, end, cache, matrix):
+    """Core of rainflow cycling according to ASTM E1049 − 85 (2017)
 
     Args:
-        turning_points (numpy array): turning points (binned) of the signal
+        point (int): bin number
+        end (bool): only True, if last point is reached
+        cache (list): residuum of counting
+        matrix (rfm object): matrix to write on
+    """
+    def count_helper(cycles):
+        i = Y[0]
+        j = Y[1]
+        matrix.values[i, j] = matrix.values[i, j] + cycles
+    # step 1
+    cache.append(point)
+    # step 6
+    if end:
+        while len(cache) > 1:
+            Y = [cache[-2], cache[-1]]
+            count_helper(0.5)
+            cache.pop()
+        return(None)
+    while len(cache) >= 3:
+        # step 2
+        X = [cache[-2], cache[-1]]
+        Y = [cache[-3], cache[-2]]
+        # step 3
+        if np.abs(X[0] - X[1]) < np.abs(Y[0] - Y[1]):
+            break
+        # step 4
+        elif len(cache) > 3:
+            count_helper(1)
+            last = cache.pop()
+            cache.pop()
+            cache.pop()
+            cache.append(last)
+            continue
+        # step 5
+        count_helper(0.5)
+        cache.reverse()
+        cache.pop()
+        cache.reverse()
+
+
+def binned_rainflow(binned_turningpoints, matrix=None, cache=[]):
+    """Rainflow cycle counting according to according to ASTM E1049 − 85 (2017) with binned data
+
+    Args:
+        binned_turningpoints (binned object): turning points (binned) of the signal
+        matrx (rfm object, optional): FromTo rfm object to write on. Bins must be conform with binned_turningpoints. None will create an empty matrix
         cache (list, optional): cache from last counting iteration
-        minvalue (None, optional): minimum value of bin edge
-        numbins (int, optional): Description
-        binsize (None, optional): Description
 
     Returns:
         rfm object: FromTo rainflow matrix object
         list: cache (residuum) from counting
-
-    Notes:
-        Binning convention is: bin[i-1] < x <= bin[i]
     """
-    # init empty matrix
-    if not minvalue:
-        minvalue = np.min(turning_points)
-    if not binsize:
-        binsize = (np.max(turning_points) - minvalue) / numbins
-    zeros = np.zeros((numbins, numbins))
-    output = from_to(zeros, binsize, minvalue, minvalue)
+    if matrix is None:
+        numbins = binned_turningpoints.numbins
+        binsize = binned_turningpoints.binsize
+        minvalue = binned_turningpoints.minvalue
+        bins = binned_turningpoints.bins
+        zeros = np.zeros((numbins, numbins))
+        matrix = from_to(zeros, binsize, bins, minvalue, minvalue)
 
-    def count_helper(cycles):
-        i = Y[0]
-        j = Y[1]
-        output.counts[i, j] = output.counts[i, j] + cycles
-    for i, point in enumerate(turning_points):
-        # step 1
-        cache.append(point)
-        # step 6
-        if i == (len(turning_points) - 1):
-            while len(cache) > 1:
-                Y = [cache[-2], cache[-1]]
-                count_helper(0.5)
-                cache.pop()
-            break
-        while len(cache) >= 3:
-            # step 2
-            X = [cache[-2], cache[-1]]
-            Y = [cache[-3], cache[-2]]
-            # step 3
-            if np.abs(X[0] - X[1]) < np.abs(Y[0] - Y[1]):
-                break
-            # step 4
-            elif len(cache) > 3:
-                count_helper(1)
-                last = cache.pop()
-                cache.pop()
-                cache.pop()
-                cache.append(last)
-                continue
-            # step 5
-            count_helper(0.5)
-            cache.reverse()
-            cache.pop()
-            cache.reverse()
-    return output, cache
+    end = False
+    for i, point in enumerate(binned_turningpoints.values):
+        if i == (len(binned_turningpoints.values) - 1):
+            end = True
+        _rainflow_counting_core(point, end, cache, matrix)
+    return matrix, cache
+
+
+def rainflow(series, numbins=128, minvalue=None, maxvalue=None):
+    """Rainflow cycle counting according to according to ASTM E1049 − 85 (2017)
+
+    Args:
+        series (TYPE): Description
+        numbins (int, optional): Description
+        minvalue (None, optional): Description
+        maxvalue (None, optional): Description
+
+    Returns:
+        TYPE: Description
+    """
+    if minvalue is None:
+        minvalue = np.min(series)
+    if maxvalue is None:
+        maxvalue = np.max(series) * 1.01
+    binned_series = bin_series(series, minvalue, maxvalue, numbins)
+    turn_p = binned(values=0, binsize=binned_series.binsize, minvalue=minvalue,
+                    numbins=numbins, bins=binned_series.bins)
+    turn_p.values = binned_series.values[turning_point_ind(binned_series.values)]
+    print(turn_p.values)
+    rfm, cache = binned_rainflow(turn_p)
+    return rfm, cache
 
 
 def bin_series(series, minvalue, maxvalue, numbins):
@@ -317,7 +360,7 @@ def bin_series(series, minvalue, maxvalue, numbins):
     bins = np.linspace(minvalue, maxvalue, numbins + 1)
     dig = np.digitize(series, bins) - 1
     binsize = bins[1] - bins[0]
-    hist = binned(dig, binsize, minvalue, numbins)
+    hist = binned(dig, binsize, minvalue, numbins, bins)
     return hist
 
 
@@ -330,8 +373,10 @@ def turning_point_ind(series):
     Returns:
         numpy array: index of turning points in series
     """
-    diff = np.diff(series)
-    index = np.nonzero(diff[1:] * diff[:-1] < 0)[0] + 1
-    # handling fisrt and last point
+    delta = np.sign(np.diff(series))
+    flat = np.nonzero(delta == 0)[0] + 1
+    extrema = np.nonzero(np.diff(delta))[0] + 1
+    index = np.setdiff1d(extrema, flat)
+    # handling first and last point
     index = np.insert(index, [0, len(index)], [0, len(series) - 1])
     return index
