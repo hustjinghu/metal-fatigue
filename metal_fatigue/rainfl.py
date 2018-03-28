@@ -145,7 +145,7 @@ class range_mean(_rfm):
             ymin (float): minimum value of bin edge in 2nd dimension
             bins (numpy array): array of bin edges for each dimension
 
-        Notes: 
+        Notes:
             Binning convention is: bins[i-1] <= x < bins[i]
         """
         _rfm.__init__(self, counts=counts, binsize=binsize, xmin=xmin, ymin=ymin,
@@ -337,7 +337,7 @@ def rainflow(series, numbins=128, minvalue=None, maxvalue=None):
     turn_p.values = binned_series.values[turning_point_ind(binned_series.values)]
     print(turn_p.values)
     rfm, cache = binned_rainflow(turn_p)
-    return rfm, cache
+   return rfm, cache
 
 
 def bin_series(series, minvalue, maxvalue, numbins):
