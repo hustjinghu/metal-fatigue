@@ -133,7 +133,7 @@ class from_to(_rfm):
 
 
 class range_mean(_rfm):
-    def __init__(self, counts, binsize, xmin, ymin):
+    def __init__(self, counts, binsize, bins, xmin, ymin):
         """Rainflow object of type "RangeMean"
 
         Args:
