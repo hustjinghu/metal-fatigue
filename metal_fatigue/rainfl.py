@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import warnings
+import copy
 
 
 class binned(object):
@@ -282,12 +283,10 @@ def _rainflow_counting_core(point, end, cache, matrix):
             continue
         # step 5
         count_helper(0.5)
-        cache.reverse()
-        cache.pop()
-        cache.reverse()
+        cache.pop(0)
 
 
-def binned_rainflow(binned_turningpoints, matrix=None, cache=[]):
+def binned_rainflow(binned_turningpoints, matrix=None, cache=None):
     """Rainflow cycle counting according to according to ASTM E1049 − 85 (2017) with binned data
 
     Args:
@@ -306,7 +305,8 @@ def binned_rainflow(binned_turningpoints, matrix=None, cache=[]):
         bins = binned_turningpoints.bins
         zeros = np.zeros((numbins, numbins))
         matrix = from_to(zeros, binsize, bins, minvalue, minvalue)
-
+    if cache is None:
+        cache = []
     end = False
     for i, point in enumerate(binned_turningpoints.values):
         if i == (len(binned_turningpoints.values) - 1):
@@ -332,12 +332,10 @@ def rainflow(series, numbins=128, minvalue=None, maxvalue=None):
     if maxvalue is None:
         maxvalue = np.max(series) * 1.01
     binned_series = bin_series(series, minvalue, maxvalue, numbins)
-    turn_p = binned(values=0, binsize=binned_series.binsize, minvalue=minvalue,
-                    numbins=numbins, bins=binned_series.bins)
-    turn_p.values = binned_series.values[turning_point_ind(binned_series.values)]
-    print(turn_p.values)
+    turn_p = copy.deepcopy(binned_series)
+    turn_p.values = binned_series.values[turning_points(binned_series.values)]
     rfm, cache = binned_rainflow(turn_p)
-   return rfm, cache
+    return rfm, cache
 
 
 def bin_series(series, minvalue, maxvalue, numbins):
@@ -380,3 +378,34 @@ def turning_point_ind(series):
     # handling first and last point
     index = np.insert(index, [0, len(index)], [0, len(series) - 1])
     return index
+
+
+def turning_points(series):
+    cache = []
+    index = []
+    for i, point in enumerate(series):
+        if i == 0:
+            if not series[i + 1] == point:
+                index.append(i)
+            continue
+        if i == (len(series) - 1):
+            if not series[i - 1] == point:
+                index.append(i)
+            break
+        nex = series[i + 1]
+        prev = series[i - 1]
+        cache.append(point)
+        if ((point > nex) and (point < prev)) or ((point < nex) and (point > prev)):
+            cache.pop()
+        elif ((point < nex) and (point < prev)) or ((point > nex) and (point > prev)):
+            index.append(i)
+            cache = [point]
+        elif np.all(point >= cache[0]) and (point > nex):
+            index.append(i)
+            cache = [point]
+        elif np.all(point <= cache[0]) and (point < nex):
+            index.append(i)
+            cache = [point]
+        else:
+            cache.pop()
+    return np.array(index)
