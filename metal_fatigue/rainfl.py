@@ -362,7 +362,7 @@ def bin_series(series, minvalue, maxvalue, numbins):
     return hist
 
 
-def turning_point_ind(series):
+def turning_points(series):
     """Get index of turning points in time series
 
     Args:
@@ -372,40 +372,12 @@ def turning_point_ind(series):
         numpy array: index of turning points in series
     """
     delta = np.sign(np.diff(series))
-    flat = np.nonzero(delta == 0)[0] + 1
+    flat = np.nonzero(delta == 0)[0]
     extrema = np.nonzero(np.diff(delta))[0] + 1
     index = np.setdiff1d(extrema, flat)
     # handling first and last point
-    index = np.insert(index, [0, len(index)], [0, len(series) - 1])
+    if series[index[0]] != series[0]:
+        index = np.insert(index, 0, 0)
+    if series[index[-1]] != series[-1]:
+        index = np.insert(index, len(index), len(series) - 1)
     return index
-
-
-def turning_points(series):
-    cache = []
-    index = []
-    for i, point in enumerate(series):
-        if i == 0:
-            if not series[i + 1] == point:
-                index.append(i)
-            continue
-        if i == (len(series) - 1):
-            if not series[i - 1] == point:
-                index.append(i)
-            break
-        nex = series[i + 1]
-        prev = series[i - 1]
-        cache.append(point)
-        if ((point > nex) and (point < prev)) or ((point < nex) and (point > prev)):
-            cache.pop()
-        elif ((point < nex) and (point < prev)) or ((point > nex) and (point > prev)):
-            index.append(i)
-            cache = [point]
-        elif np.all(point >= cache[0]) and (point > nex):
-            index.append(i)
-            cache = [point]
-        elif np.all(point <= cache[0]) and (point < nex):
-            index.append(i)
-            cache = [point]
-        else:
-            cache.pop()
-    return np.array(index)
