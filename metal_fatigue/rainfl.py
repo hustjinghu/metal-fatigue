@@ -84,25 +84,25 @@ class _rfm(binned):
         ax = fig.add_subplot((111))
 
         # imshow plot
-        rxmax = self.xmin + self.binsize[0] * self.values.shape[0]
+        rxmax = self.xmin + self.bins[0][-1] * self.values.shape[0]
         rxmin = self.xmin
         rymax = self.ymin + self.binsize[0] * self.values.shape[1]
         rymin = self.ymin
-        cax = ax.imshow(self.values, cmap=plt.get_cmap("Blues"), extent=(rxmin, rxmax, rymax, rymin), **kwargs)
+        cax = ax.imshow(self.values,
+                        cmap=plt.get_cmap("Blues"),
+                        extent=(self.bins[0][0], self.bins[0][-1], self.bins[1][-1], self.bins[1][0]),
+                        **kwargs)
 
         # create colorbar
-        fig.colorbar(cax, ticks=np.linspace(0, self.values.max(), 10))
+        bar = fig.colorbar(cax)
 
-        # create grid
-        xticks = np.linspace(rxmin, rxmax, int(np.ceil((rxmax - rxmin) / self.binsize[0] + 1)))
-        yticks = np.linspace(rymin, rymax, int(np.ceil((rymax - rymin) / self.binsize[0] + 1)))
-        ax.set_xticks(xticks, minor=True)
-        ax.set_yticks(yticks, minor=True)
-        ax.grid(which='both')
+        # create grid and ticks
         ax.grid(which='minor', alpha=0.8, linewidth=0.3)
-        ax.grid(which='major', alpha=0)
         ax.xaxis.tick_top()
         ax.xaxis.set_label_position('top')
+        ax.xaxis.set_minor_locator(plt.FixedLocator(self.bins[0]))
+        ax.yaxis.set_minor_locator(plt.FixedLocator(self.bins[0]))
+        ax.tick_params(which="minor", direction="in")
         if self.matrixtype == 'FromTo':
             ylabel = 'From'
             xlabel = 'To'
@@ -111,6 +111,7 @@ class _rfm(binned):
             xlabel = 'Mean'
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
+        fig.tight_layout()
         return fig, ax
 
 
@@ -129,7 +130,7 @@ class from_to(_rfm):
             Binning convention is: bins[i-1] <= x < bins[i]
         """
         _rfm.__init__(self, counts=counts, binsize=binsize, xmin=xmin, ymin=ymin,
-                      bins=np.array([bins, bins]), matrixtype='FromTo')
+                      bins=bins, matrixtype='FromTo')
 
     def to_range_mean():
         pass
@@ -150,7 +151,7 @@ class range_mean(_rfm):
             Binning convention is: bins[i-1] <= x < bins[i]
         """
         _rfm.__init__(self, counts=counts, binsize=binsize, xmin=xmin, ymin=ymin,
-                      bins=np.array([bins, bins]), matrixtype='RangeMean')
+                      bins=bins, matrixtype='RangeMean')
 
     def to_from_to():
         pass
@@ -364,10 +365,10 @@ def bin_series(series, minvalue, maxvalue, numbins):
 
 def turning_points(series):
     """Estimating the index values of the turning points in a series
-    
+
     Args:
         series (numpy array): series for estimating turning points
-    
+
     Returns:
         numpy array: index array
     """
