@@ -248,7 +248,11 @@ def _rainflow_counting_core(point, end, cache):
         point (int): bin number
         end (bool): only True, if last point is reached
         cache (list): residuum of counting
-        matrix (rfm object): matrix to write on
+
+    Returns:
+        list: list with from values
+        list: list with to values
+        list: list with counted cycles
     """
     from_ = []
     to_ = []
@@ -289,7 +293,7 @@ def _rainflow_counting_core(point, end, cache):
 
 
 def binned_rainflow(binned_turningpoints, matrix=None, cache=None):
-    """Rainflow cycle counting according to according to ASTM E1049 − 85 (2017) with binned data
+    """Rainflow cycle counting  with binned data
 
     Args:
         binned_turningpoints (binned object): turning points (binned) of the signal
@@ -319,17 +323,47 @@ def binned_rainflow(binned_turningpoints, matrix=None, cache=None):
     return matrix, cache
 
 
-def rainflow(series, numbins=128, minvalue=None, maxvalue=None):
-    """Rainflow cycle counting according to according to ASTM E1049 − 85 (2017)
+def continuous_rainflow(turning_points, cache=None):
+    """Rainflow counting without binning according to according to ASTM E1049 − 85 (2017)
 
     Args:
-        series (TYPE): Description
-        numbins (int, optional): Description
-        minvalue (None, optional): Description
-        maxvalue (None, optional): Description
+        turning_points (numpy array): turning points of time series
+        cache (list, optional): cache from last counting iteration
 
     Returns:
-        TYPE: Description
+        numpy array: array with range values
+        numpy array: array with mean values
+        numpy array: array with counted cycles
+    """
+    if cache is None:
+        cache = []
+    range_ = []
+    mean_ = []
+    cycle = []
+    end = False
+    for i, point in enumerate(turning_points):
+        if i == (len(turning_points) - 1):
+            end = True
+        from_, to_, cycles_ = _rainflow_counting_core(point, end, cache)
+        for f_, t_, c_ in zip(from_, to_, cycles_):
+            range_.append(np.abs(f_ - t_))
+            mean_.append((f_ + t_) / 2.)
+            cycle.append(c_)
+    return np.array(range_), np.array(mean_), np.array(cycle), cache
+
+
+def rainflow(series, numbins=128, minvalue=None, maxvalue=None):
+    """Rainflow cycle counting with binning
+
+    Args:
+        series (numpy array): series for counting
+        numbins (int, optional): number of bins
+        minvalue (float, optional): minimum value of bin edge 
+        maxvalue (float, optional): maximum value of bin edge
+
+    Returns:
+        rfm object: FromTo rainflow matrix object
+        list: cache (residuum) from counting
     """
     if minvalue is None:
         minvalue = np.min(series)
