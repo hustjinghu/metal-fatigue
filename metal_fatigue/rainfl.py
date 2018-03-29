@@ -84,17 +84,13 @@ class _rfm(binned):
         ax = fig.add_subplot((111))
 
         # imshow plot
-        rxmax = self.xmin + self.bins[0][-1] * self.values.shape[0]
-        rxmin = self.xmin
-        rymax = self.ymin + self.binsize[0] * self.values.shape[1]
-        rymin = self.ymin
         cax = ax.imshow(self.values,
                         cmap=plt.get_cmap("Blues"),
                         extent=(self.bins[0][0], self.bins[0][-1], self.bins[1][-1], self.bins[1][0]),
                         **kwargs)
 
         # create colorbar
-        bar = fig.colorbar(cax)
+        fig.colorbar(cax)
 
         # create grid and ticks
         ax.grid(which='minor', alpha=0.8, linewidth=0.3)
