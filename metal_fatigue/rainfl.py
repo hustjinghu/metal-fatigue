@@ -391,6 +391,3 @@ def turning_points(series):
         else:
             cache.pop()
     return np.array(index)
-
-
-# def turning_points(series):
