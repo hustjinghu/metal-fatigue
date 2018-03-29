@@ -363,6 +363,14 @@ def bin_series(series, minvalue, maxvalue, numbins):
 
 
 def turning_points(series):
+    """Estimating the index values of the turning points in a series
+    
+    Args:
+        series (numpy array): series for estimating turning points
+    
+    Returns:
+        numpy array: index array
+    """
     cache = []
     index = []
     for i, point in enumerate(series):
