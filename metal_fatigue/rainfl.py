@@ -241,7 +241,7 @@ def mulitply(*matrices):
     return output
 
 
-def _rainflow_counting_core(point, end, cache, matrix):
+def _rainflow_counting_core(point, end, cache):
     """Core of rainflow cycling according to ASTM E1049 − 85 (2017)
 
     Args:
@@ -250,10 +250,14 @@ def _rainflow_counting_core(point, end, cache, matrix):
         cache (list): residuum of counting
         matrix (rfm object): matrix to write on
     """
+    from_ = []
+    to_ = []
+    cycles_ = []
+
     def count_helper(cycles):
-        i = Y[0]
-        j = Y[1]
-        matrix.values[i, j] = matrix.values[i, j] + cycles
+        from_.append(Y[0])
+        to_.append(Y[1])
+        cycles_.append(cycles)
     # step 1
     cache.append(point)
     # step 6
@@ -262,7 +266,7 @@ def _rainflow_counting_core(point, end, cache, matrix):
             Y = [cache[-2], cache[-1]]
             count_helper(0.5)
             cache.pop()
-        return(None)
+        return from_, to_, cycles_
     while len(cache) >= 3:
         # step 2
         X = [cache[-2], cache[-1]]
@@ -281,6 +285,7 @@ def _rainflow_counting_core(point, end, cache, matrix):
         # step 5
         count_helper(0.5)
         cache.pop(0)
+    return from_, to_, cycles_
 
 
 def binned_rainflow(binned_turningpoints, matrix=None, cache=None):
@@ -308,7 +313,9 @@ def binned_rainflow(binned_turningpoints, matrix=None, cache=None):
     for i, point in enumerate(binned_turningpoints.values):
         if i == (len(binned_turningpoints.values) - 1):
             end = True
-        _rainflow_counting_core(point, end, cache, matrix)
+        from_, to_, cycles_ = _rainflow_counting_core(point, end, cache)
+        for f_, t_, c_ in zip(from_, to_, cycles_):
+            matrix.values[f_, t_] = matrix.values[f_, t_] + c_
     return matrix, cache
 
 
