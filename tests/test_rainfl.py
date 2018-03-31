@@ -29,7 +29,7 @@ def test_binned():
     scaled = binned_object.multiply_constant(5.1)
     np.testing.assert_allclose(result, scaled.values)
 
-    # multiply_constant
+    # add_constant
     result = values + 5.1
     added = binned_object.add_constant(5.1)
     np.testing.assert_allclose(result, added.values)
@@ -157,6 +157,19 @@ def test_consistency_check():
     rfm3 = rainfl.from_to(c, 0.1, -1, 1)
     with pytest.raises(ValueError):
         rainfl.consistency_check(rfm1, rfm2, rfm3)
+
+
+def test_continuous_rainflow():
+    series = np.array([-2, 1, -3, 5, -1, 3, -4, 4, -2])
+    meanvals = np.array([-0.5, -1., 1., 1., 1., 0., 0.5])
+    rangevals = np.array([3, 4, 4, 8, 6, 8, 9])
+    cyclevals = np.array([0.5, 0.5, 1., 0.5, 0.5, 0.5, 0.5])
+    res = [5]
+    ra, mea, cyc, re = rainfl.continuous_rainflow(series)
+    np.testing.assert_allclose(rangevals, ra)
+    np.testing.assert_allclose(meanvals, mea)
+    np.testing.assert_allclose(cyclevals, cyc)
+    np.testing.assert_allclose(res, re)
 
 
 if __name__ == '__main__':

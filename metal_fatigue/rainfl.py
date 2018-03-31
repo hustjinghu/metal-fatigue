@@ -153,9 +153,6 @@ class range_mean(_rfm):
         """
         _rfm.__init__(self, counts=counts, binsize=binsize, xmin=xmin, ymin=ymin, matrixtype='RangeMean')
 
-    def to_from_to():
-        pass
-
 
 def zerosrfm_like(matrix):
     """Generates a rainflow matrix filled with zeroes with dimensions like matrix
